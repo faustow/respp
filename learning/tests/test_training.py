@@ -8,8 +8,8 @@ from sklearn.model_selection import train_test_split
 from learning.models import AmesNet
 from learning.training import fetch_data
 
-BASELINE_MSE = 1289987200
-BASELINE_R2 = 0.8417234420776367
+BASELINE_MSE = 1243097984.0
+BASELINE_R2 = 0.847476601600647
 
 
 class AmesNetRegressionTests(TestCase):
