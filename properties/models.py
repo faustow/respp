@@ -92,3 +92,6 @@ class Property(models.Model):
 
     class Meta:
         verbose_name_plural = "properties"
+
+    def __str__(self):
+        return f"Property Pid{self.pid} - neighborhood: {self.neighborhood} - sale price: {self.saleprice}"
