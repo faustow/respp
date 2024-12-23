@@ -1,2 +1,2 @@
 # respp
-Real Estate Sale Price Prediction
+A Django app for Real Estate Sale Price Prediction
