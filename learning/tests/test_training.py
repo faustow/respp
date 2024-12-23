@@ -1,11 +1,15 @@
 import os
-import numpy as np
+
 import torch
 from django.test import TestCase
-from learning.models import AmesNet
-from learning.training import fetch_data
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
+
+from learning.models import AmesNet
+from learning.training import fetch_data
+
+BASELINE_MSE = 1289987200
+BASELINE_R2 = 0.8417234420776367
 
 
 class AmesNetRegressionTests(TestCase):
@@ -36,9 +40,10 @@ class AmesNetRegressionTests(TestCase):
         with torch.no_grad():
             predictions = self.model(torch.tensor(self.X_test, dtype=torch.float32)).squeeze().numpy()
         r2 = r2_score(self.y_test, predictions)
-        self.assertGreater(
+        print(f"R^2 score: {r2}")
+        self.assertGreaterEqual(
             r2,
-            0.54,
+            BASELINE_R2,
             f"R^2 score is too low: {r2}. Model might have regressed.",
         )
 
@@ -49,8 +54,9 @@ class AmesNetRegressionTests(TestCase):
         with torch.no_grad():
             predictions = self.model(torch.tensor(self.X_test, dtype=torch.float32)).squeeze().numpy()
         mse = mean_squared_error(self.y_test, predictions)
+        print(f"MSE: {mse}")
         self.assertLessEqual(
             mse,
-            3745900544,
+            BASELINE_MSE,
             f"MSE is too high: {mse}. Model might have regressed.",
         )
