@@ -7,12 +7,7 @@ from properties.models import Property
 
 # Columns selected for training
 SELECTED_COLUMNS = [
-    "pid", "mssubclass", "mszoning", "lotarea", "overallqual", "overallcond",
-    "yearbuilt", "yearremodadd", "grlivarea", "garagecars", "garagesqft",
-    "totrmsabvgrd", "fullbath", "halfbath", "bedroomabvgr", "kitchenabvgr", "saleprice",
-    "fireplaces", "heatingqc", "centralair", "exterqual", "bsmtfinsf1",
-    "totalbsmtsf", "firstflrsf", "secondflrsf", "paveddrive", "openporchsf",
-    "wooddecksf", "lotconfig", "neighborhood", "condition1", "housestyle",
+    "lotarea", "overallqual", "overallcond", "centralair", "fullbath", "bedroomabvgr", "garagecars", "saleprice"
 ]
 
 

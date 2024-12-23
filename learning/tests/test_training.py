@@ -6,8 +6,8 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 from learning.models import AmesNet
 
-BASELINE_MSE = 1295588224.6716
-BASELINE_R2 = 0.8410
+BASELINE_MSE = 1888914432.0
+BASELINE_R2 = 0.7682373523712158
 
 
 
