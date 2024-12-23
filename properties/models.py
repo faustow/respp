@@ -3,7 +3,7 @@ from django.db import models
 
 class Property(models.Model):
     # Identifying and general information
-    id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True, help_text="Unique identifier for the property")
     pid = models.IntegerField(help_text="Parcel Identification Number")
     mssubclass = models.IntegerField(help_text="The building class")
     mszoning = models.CharField(max_length=50, help_text="General zoning classification")
@@ -88,3 +88,7 @@ class Property(models.Model):
     saletype = models.CharField(max_length=50, help_text="Type of sale")
     salecondition = models.CharField(max_length=50, help_text="Condition of sale")
     saleprice = models.IntegerField(help_text="Sale price (in USD)")
+    data_source = models.IntegerField(blank=False, null=False, default=1, help_text="Source of the data: 1 is Ames")
+
+    class Meta:
+        verbose_name_plural = "properties"

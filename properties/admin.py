@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Property
+
+# Register the Property model with the admin site
+admin.site.register(Property, )
