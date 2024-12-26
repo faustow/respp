@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from django.core.management.base import BaseCommand
 
-from learning.datasets import fetch_data
+from config.settings import GLOBAL_SEED
 from learning.training import train_and_evaluate
 
 
@@ -11,8 +11,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # Set global seeds
-        torch.manual_seed(42)
-        np.random.seed(42)
+        torch.manual_seed(GLOBAL_SEED)
+        np.random.seed(GLOBAL_SEED)
 
         self.stdout.write("Starting the training process...")
         rmse, r2 = train_and_evaluate()

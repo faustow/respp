@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from django.db import migrations
 
+from config.settings import GLOBAL_SEED
+
 
 def load_ames_data(apps, schema_editor):
     Property = apps.get_model("properties", "Property")
@@ -17,7 +19,7 @@ def load_ames_data(apps, schema_editor):
     data["centralair"] = data["Central Air"].map({"Y": True, "N": False}).fillna(False)
 
     # Hacer el split reproducible
-    np.random.seed(42)
+    np.random.seed(GLOBAL_SEED)
     data["dataset_type"] = np.random.choice(
         ["training", "validation", "test"],
         size=len(data),

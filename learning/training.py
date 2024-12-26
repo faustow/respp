@@ -7,6 +7,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, Dataset
 
+from config.settings import AMES_MODEL_FILENAME, SCALER_FILENAME
 from learning.models import AmesNet
 from properties.models import Property
 
@@ -79,12 +80,12 @@ def train_and_evaluate():
         print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss / len(train_loader):.4f}")
 
     # Guardar el escalador
-    joblib.dump(scaler, "scaler.pkl")
-    print(f"Scaler saved to scaler.pkl.")
+    joblib.dump(scaler, SCALER_FILENAME)
+    print(f"Scaler saved to {SCALER_FILENAME}.")
 
     # Guardar modelo
-    torch.save(model.state_dict(), "ames_model.pth")
-    print("Model saved to 'ames_model.pth'.")
+    torch.save(model.state_dict(), AMES_MODEL_FILENAME)
+    print(f"Model saved to {AMES_MODEL_FILENAME}.")
 
     # Validación
     model.eval()
@@ -104,3 +105,14 @@ def train_and_evaluate():
     print(f"Validation Loss (RMSE): {rmse:.4f}")
     print(f"R^2 Score: {r2:.4f}")
     return rmse, r2
+
+
+def load_model_and_scaler():
+    """
+    Carga el modelo de AmesNet y el escalador.
+    """
+    model = AmesNet(input_dim=7)
+    model.load_state_dict(torch.load(AMES_MODEL_FILENAME, map_location=torch.device("cpu")))
+    model.eval()
+    scaler = joblib.load(SCALER_FILENAME)
+    return model, scaler
