@@ -4,8 +4,11 @@ from .models import Property
 
 
 class PropertyAdmin(admin.ModelAdmin):
-    list_display = ('pid', 'neighborhood', 'lotarea', 'yrsold', 'mosold', 'salecondition', 'saletype', 'saleprice')
-    list_filter = ('neighborhood', 'salecondition', 'saletype', 'yrsold')
+    list_display = (
+        'pid', 'lotarea', 'overallqual', 'overallcond', 'centralair', 'fullbath', 'bedroomabvgr', 'garagecars',
+        'saleprice', 'data_source', 'dataset'
+    )
+    list_filter = ('data_source', 'dataset')
 
 
 admin.site.register(Property, PropertyAdmin)

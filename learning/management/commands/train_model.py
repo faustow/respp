@@ -14,10 +14,7 @@ class Command(BaseCommand):
         torch.manual_seed(42)
         np.random.seed(42)
 
-        self.stdout.write("Fetching data...")
-        data, labels = fetch_data()
-
         self.stdout.write("Starting the training process...")
-        mse, r2 = train_and_evaluate(data, labels)
+        mse, r2 = train_and_evaluate()
 
         self.stdout.write(f"Training completed. MSE: {mse:.4f}, R^2: {r2:.4f}")

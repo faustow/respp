@@ -1,63 +1,47 @@
-import os
-import numpy as np
+import joblib
 import torch
 from django.test import TestCase
 from sklearn.metrics import mean_squared_error, r2_score
 
 from learning.models import AmesNet
+from properties.models import Property
 
-BASELINE_MSE = 1888914432.0
-BASELINE_R2 = 0.7682373523712158
-
+BASELINE_MSE = 1531218048.0
+BASELINE_R2 = 0.7233098745346069
 
 
 class AmesNetRegressionTests(TestCase):
     @classmethod
     def setUpClass(cls):
-        """
-        Set up the dataset and load the trained model for all tests.
-        """
         super().setUpClass()
-        torch.manual_seed(42)
-        np.random.seed(42)
 
-        # Load test data
-        cls.data = np.load("data_test.npy")
-        cls.labels = np.load("labels_test.npy")
+        # Fetch test data from the database
+        test_data = Property.objects.filter(dataset="test")
+        cls.data = torch.tensor(test_data.values_list(
+            "lotarea", "overallqual", "overallcond", "centralair", "fullbath",
+            "bedroomabvgr", "garagecars"
+        ), dtype=torch.float32)
+        cls.labels = torch.tensor(test_data.values_list("saleprice", flat=True), dtype=torch.float32)
+
+        # Cargar el escalador y escalar los datos de prueba
+        scaler = joblib.load("scaler.pkl")
+        cls.data = torch.tensor(scaler.transform(cls.data.numpy()), dtype=torch.float32)
 
         # Initialize the model
-        cls.model = AmesNet(input_dim=cls.data.shape[1])
-        model_path = "ames_model.pth"
-        if os.path.exists(model_path):
-            cls.model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
-        else:
-            raise FileNotFoundError(f"Trained model weights not found at {model_path}")
+        cls.model = AmesNet(input_dim=7)
+        cls.model.load_state_dict(torch.load("ames_model.pth", map_location=torch.device("cpu")))
         cls.model.eval()
 
     def test_r2_score(self):
-        """
-        Ensure the R^2 score meets a minimum threshold using pre-trained weights.
-        """
         with torch.no_grad():
-            predictions = self.model(torch.tensor(self.data, dtype=torch.float32)).squeeze().numpy()
-        r2 = r2_score(self.labels, predictions)
+            predictions = self.model(self.data).squeeze().numpy()
+        r2 = r2_score(self.labels.numpy(), predictions)
         print(f"R^2 score: {r2}")
-        self.assertGreaterEqual(
-            r2,
-            BASELINE_R2,
-            f"R^2 score is too low: {r2}. Model might have regressed.",
-        )
+        self.assertGreaterEqual(r2, BASELINE_R2, f"R^2 score too low: {r2}")
 
     def test_mse(self):
-        """
-        Ensure the Mean Squared Error (MSE) meets a maximum threshold using pre-trained weights.
-        """
         with torch.no_grad():
-            predictions = self.model(torch.tensor(self.data, dtype=torch.float32)).squeeze().numpy()
-        mse = mean_squared_error(self.labels, predictions)
+            predictions = self.model(self.data).squeeze().numpy()
+        mse = mean_squared_error(self.labels.numpy(), predictions)
         print(f"MSE: {mse}")
-        self.assertLessEqual(
-            mse,
-            BASELINE_MSE,
-            f"MSE is too high: {mse}. Model might have regressed.",
-        )
+        self.assertLessEqual(mse, BASELINE_MSE, f"MSE too high: {mse}")

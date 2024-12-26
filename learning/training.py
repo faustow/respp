@@ -1,15 +1,17 @@
-import numpy as np
+import joblib
+import pandas as pd
 import torch
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, Dataset
 
-from .models import AmesNet
+from learning.models import AmesNet
+from properties.models import Property
 
 
 class AmesDataset(Dataset):
-    def __init__(self, data, labels):
-        self.data = torch.tensor(data, dtype=torch.float32)
+    def __init__(self, features, labels):
+        self.data = torch.tensor(features, dtype=torch.float32)
         self.labels = torch.tensor(labels, dtype=torch.float32)
 
     def __len__(self):
@@ -19,31 +21,51 @@ class AmesDataset(Dataset):
         return self.data[idx], self.labels[idx]
 
 
-def train_and_evaluate(data, labels, model_path="ames_model.pth"):
-    """
-    Train the model and evaluate it.
-    Returns metrics: MSE and R^2.
-    """
-    # Split the dataset
-    X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
+def train_and_evaluate():
+    # Cargar datos de la base de datos
+    training_data = Property.objects.filter(dataset="training").values_list(
+        "lotarea", "overallqual", "overallcond", "centralair", "fullbath", "bedroomabvgr", "garagecars", "saleprice"
+    )
+    validation_data = Property.objects.filter(dataset="validation").values_list(
+        "lotarea", "overallqual", "overallcond", "centralair", "fullbath", "bedroomabvgr", "garagecars", "saleprice"
+    )
 
-    # Create datasets and dataloaders
-    train_dataset = AmesDataset(X_train, y_train)
-    test_dataset = AmesDataset(X_test, y_test)
+    # Convertir a DataFrames para escalado
+    training_df = pd.DataFrame(training_data,
+                               columns=["lotarea", "overallqual", "overallcond", "centralair", "fullbath",
+                                        "bedroomabvgr", "garagecars", "saleprice"])
+    validation_df = pd.DataFrame(validation_data,
+                                 columns=["lotarea", "overallqual", "overallcond", "centralair", "fullbath",
+                                          "bedroomabvgr", "garagecars", "saleprice"])
+
+    # Separar características y etiquetas
+    X_train = training_df.drop(columns=["saleprice"]).values
+    y_train = training_df["saleprice"].values
+    X_val = validation_df.drop(columns=["saleprice"]).values
+    y_val = validation_df["saleprice"].values
+
+    # Ajustar el escalador con el conjunto de entrenamiento
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_val_scaled = scaler.transform(X_val)
+
+    # Crear datasets y dataloaders
+    train_dataset = AmesDataset(X_train_scaled, y_train)
+    val_dataset = AmesDataset(X_val_scaled, y_val)
+
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=32)
+    val_loader = DataLoader(val_dataset, batch_size=32)
 
-    # Initialize the model
-    model = AmesNet(input_dim=data.shape[1])
+    # Inicializar modelo, pérdida y optimizador
+    model = AmesNet(input_dim=X_train_scaled.shape[1])
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    # Training loop
+    # Entrenamiento
     epochs = 50
     for epoch in range(epochs):
         model.train()
         total_loss = 0
-
         for batch_data, batch_labels in train_loader:
             optimizer.zero_grad()
             predictions = model(batch_data).squeeze()
@@ -54,27 +76,28 @@ def train_and_evaluate(data, labels, model_path="ames_model.pth"):
 
         print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss / len(train_loader):.4f}")
 
-    # Save the model
-    torch.save(model.state_dict(), model_path)
-    np.save("data_test.npy", X_test)
-    np.save("labels_test.npy", y_test)
+    # Guardar el escalador
+    joblib.dump(scaler, "scaler.pkl")
+    print(f"Scaler saved to scaler.pkl.")
 
-    print(f"Model saved to '{model_path}'.")
+    # Guardar modelo
+    torch.save(model.state_dict(), "ames_model.pth")
+    print("Model saved to 'ames_model.pth'.")
 
-    # Evaluation
+    # Validación
     model.eval()
+    predictions = []
+    true_labels = []
     with torch.no_grad():
-        predictions = []
-        true_labels = []
-        for batch_data, batch_labels in test_loader:
+        for batch_data, batch_labels in val_loader:
             preds = model(batch_data).squeeze()
             predictions.extend(preds.numpy())
             true_labels.extend(batch_labels.numpy())
 
+    # Métricas de evaluación
     mse = mean_squared_error(true_labels, predictions)
     r2 = r2_score(true_labels, predictions)
 
-    print(f"Test Loss (MSE): {mse:.4f}")
+    print(f"Validation Loss (MSE): {mse:.4f}")
     print(f"R^2 Score: {r2:.4f}")
-
     return mse, r2
