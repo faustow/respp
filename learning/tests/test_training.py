@@ -1,3 +1,5 @@
+from math import sqrt
+
 import joblib
 import torch
 from django.test import TestCase
@@ -6,7 +8,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from learning.models import AmesNet
 from properties.models import Property
 
-BASELINE_MSE = 1531218048.0
+BASELINE_RMSE = 39130.78133643641
 BASELINE_R2 = 0.7233098745346069
 
 
@@ -39,9 +41,10 @@ class AmesNetRegressionTests(TestCase):
         print(f"R^2 score: {r2}")
         self.assertGreaterEqual(r2, BASELINE_R2, f"R^2 score too low: {r2}")
 
-    def test_mse(self):
+    def test_rmse(self):
         with torch.no_grad():
             predictions = self.model(self.data).squeeze().numpy()
         mse = mean_squared_error(self.labels.numpy(), predictions)
-        print(f"MSE: {mse}")
-        self.assertLessEqual(mse, BASELINE_MSE, f"MSE too high: {mse}")
+        rmse = sqrt(mse)
+        print(f"RMSE: {rmse}")
+        self.assertLessEqual(rmse, BASELINE_RMSE, f"MSE too high: {rmse}")

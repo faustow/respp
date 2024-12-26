@@ -15,6 +15,6 @@ class Command(BaseCommand):
         np.random.seed(42)
 
         self.stdout.write("Starting the training process...")
-        mse, r2 = train_and_evaluate()
+        rmse, r2 = train_and_evaluate()
 
-        self.stdout.write(f"Training completed. MSE: {mse:.4f}, R^2: {r2:.4f}")
+        self.stdout.write(f"Training completed. RMSE: {rmse:.4f}, R^2: {r2:.4f}")

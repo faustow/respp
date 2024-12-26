@@ -1,3 +1,5 @@
+from math import sqrt
+
 import joblib
 import pandas as pd
 import torch
@@ -96,8 +98,9 @@ def train_and_evaluate():
 
     # Métricas de evaluación
     mse = mean_squared_error(true_labels, predictions)
+    rmse = sqrt(mse)
     r2 = r2_score(true_labels, predictions)
 
-    print(f"Validation Loss (MSE): {mse:.4f}")
+    print(f"Validation Loss (RMSE): {rmse:.4f}")
     print(f"R^2 Score: {r2:.4f}")
-    return mse, r2
+    return rmse, r2
