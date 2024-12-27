@@ -24,7 +24,7 @@ async def main():
     auth_token = os.getenv("NGROK_TOKEN")
     ngrok.set_auth_token(auth_token)
     django_tunnel = ngrok.connect(8000)
-    print("Django public URL:", django_tunnel.public_url + "/admin")
+    print("Django public URL:", django_tunnel.public_url + "/admin/")
     os.environ["DJANGO_PUBLIC_URL"] = django_tunnel.public_url
 
     # Ejecutar Django y Gradio en paralelo
