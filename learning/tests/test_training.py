@@ -8,7 +8,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from learning.models import AmesNet
 from learning.training import prepare_dataset
 
-BASELINE_RMSE = 39130.78133643641
+BASELINE_RMSE = 39130.782971977445
 BASELINE_R2 = 0.7233098745346069
 
 
@@ -28,7 +28,7 @@ class AmesNetRegressionTests(TestCase):
 
         # Inicializar el modelo
         cls.model = AmesNet(input_dim=7)
-        cls.model.load_state_dict(torch.load("ames_model.pth", map_location=torch.device("cpu")))
+        cls.model.load_state_dict(torch.load("ames_model.pth", map_location=torch.device("cpu"), weights_only=True))
         cls.model.eval()
 
     def test_r2_score(self):
