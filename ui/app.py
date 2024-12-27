@@ -42,8 +42,8 @@ def record_price(lotarea, overallqual, overallcond, centralair, fullbath, bedroo
         return response.json().get("message", "Property created successfully")
     return f"Error: {response.status_code}, {response.text}"
 
-def create_ui():
 
+def create_ui():
     # Definir interfaces para Gradio
     with gr.Blocks() as app:
         gr.Markdown("### Sale Price Estimation and Recording UI")
@@ -98,8 +98,10 @@ def create_ui():
                 saleprice_record,
             ],
             outputs=[record_message],
-    )
+        )
+
 
 # Ejecutar la aplicación
 if __name__ == "__main__":
+    app = create_ui()
     app.launch()
