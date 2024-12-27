@@ -6,7 +6,7 @@ from django.test import TestCase
 from sklearn.metrics import mean_squared_error, r2_score
 
 from learning.models import AmesNet
-from properties.models import Property
+from learning.training import prepare_dataset
 
 BASELINE_RMSE = 39130.78133643641
 BASELINE_R2 = 0.7233098745346069
@@ -17,19 +17,16 @@ class AmesNetRegressionTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        # Fetch test data from the database
-        test_data = Property.objects.filter(dataset="test")
-        cls.data = torch.tensor(test_data.values_list(
-            "lotarea", "overallqual", "overallcond", "centralair", "fullbath",
-            "bedroomabvgr", "garagecars"
-        ), dtype=torch.float32)
-        cls.labels = torch.tensor(test_data.values_list("saleprice", flat=True), dtype=torch.float32)
+        # Cargar los datos de prueba del conjunto "test"
+        X_test, y_test = prepare_dataset("test")
+        cls.labels = torch.tensor(y_test, dtype=torch.float32)
 
         # Cargar el escalador y escalar los datos de prueba
         scaler = joblib.load("scaler.pkl")
-        cls.data = torch.tensor(scaler.transform(cls.data.numpy()), dtype=torch.float32)
+        X_test_scaled = scaler.transform(X_test)
+        cls.data = torch.tensor(X_test_scaled, dtype=torch.float32)
 
-        # Initialize the model
+        # Inicializar el modelo
         cls.model = AmesNet(input_dim=7)
         cls.model.load_state_dict(torch.load("ames_model.pth", map_location=torch.device("cpu")))
         cls.model.eval()
