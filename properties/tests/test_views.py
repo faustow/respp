@@ -28,13 +28,28 @@ class PropertiesAPITestCase(TestCase):
             "bedroomabvgr": 3,
             "garagecars": 2,
             "saleprice": 250000,
-            "dataset": "training",
-            "data_source": 2,
         }
         response = self.client.post(self.url, valid_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Property.objects.count(), amount + 1)
-        self.assertEqual(Property.objects.order_by('id').last().saleprice, valid_data["saleprice"])
+        self.assertEqual(Property.objects.last().saleprice, valid_data["saleprice"])
+
+    def test_create_property_adds_default_fields(self):
+        valid_data = {
+            "lotarea": 20000,
+            "overallqual": 8,
+            "overallcond": 5,
+            "centralair": 1,
+            "fullbath": 2,
+            "bedroomabvgr": 3,
+            "garagecars": 2,
+            "saleprice": 350000,
+        }
+        response = self.client.post(self.url, valid_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        last_property = Property.objects.last()
+        self.assertEqual(last_property.dataset, 'training')
+        self.assertEqual(last_property.data_source, 2)
 
     def test_create_property_failure(self):
         invalid_data = {

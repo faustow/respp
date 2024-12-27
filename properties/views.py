@@ -21,6 +21,9 @@ class PropertiesAPIView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        # Add data_source=2 and dataset="training" to the request data
+        request.data["data_source"] = 2
+        request.data["dataset"] = "training"
         serializer = PropertySerializer(data=request.data)
         if serializer.is_valid():
             property_instance = serializer.save()  # Guarda la propiedad
