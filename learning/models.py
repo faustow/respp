@@ -1,4 +1,6 @@
+import torch
 import torch.nn as nn
+from torch.utils.data import Dataset
 
 
 class AmesNet(nn.Module):
@@ -18,3 +20,15 @@ class AmesNet(nn.Module):
 
     def forward(self, x):
         return self.fc(x)
+
+
+class AmesDataset(Dataset):
+    def __init__(self, features, labels):
+        self.data = torch.tensor(features, dtype=torch.float32)
+        self.labels = torch.tensor(labels, dtype=torch.float32)
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        return self.data[idx], self.labels[idx]

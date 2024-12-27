@@ -5,37 +5,21 @@ import pandas as pd
 import torch
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
-from config.settings import AMES_MODEL_FILENAME, SCALER_FILENAME, BATCH_SIZE
-from learning.models import AmesNet
+from config.settings import AMES_MODEL_FILENAME, SCALER_FILENAME, BATCH_SIZE, TRAINING_COLUMNS
+from learning.models import AmesNet, AmesDataset
 from properties.models import Property
-
-
-class AmesDataset(Dataset):
-    def __init__(self, features, labels):
-        self.data = torch.tensor(features, dtype=torch.float32)
-        self.labels = torch.tensor(labels, dtype=torch.float32)
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, idx):
-        return self.data[idx], self.labels[idx]
 
 
 def prepare_dataset(dataset_name):
     """
     Carga y limpia los datos desde la base de datos según el nombre del dataset.
     """
-    data = Property.objects.filter(dataset=dataset_name).values_list(
-        "lotarea", "overallqual", "overallcond", "centralair", "fullbath", "bedroomabvgr", "garagecars", "saleprice"
-    )
+    data = Property.objects.filter(dataset=dataset_name).values_list(*TRAINING_COLUMNS)
 
     # Convertir a DataFrame
-    df = pd.DataFrame(data, columns=[
-        "lotarea", "overallqual", "overallcond", "centralair", "fullbath", "bedroomabvgr", "garagecars", "saleprice"
-    ])
+    df = pd.DataFrame(data, columns=TRAINING_COLUMNS)
 
     # Reemplazar valores nulos
     df.fillna(0, inplace=True)  # Sustituye None con 0 o ajusta según las necesidades

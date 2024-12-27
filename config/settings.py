@@ -137,3 +137,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 GLOBAL_SEED = 42
 AMES_MODEL_FILENAME = "ames_model.pth"
 SCALER_FILENAME = "scaler.pkl"
+BATCH_SIZE = 32
+TRAINING_COLUMNS = ["lotarea", "overallqual", "overallcond", "centralair", "fullbath", "bedroomabvgr", "garagecars",
+                    "saleprice"]
