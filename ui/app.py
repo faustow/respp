@@ -1,13 +1,16 @@
+import os
+
 import gradio as gr
 import requests
-
-# Configuración de los endpoints
-PREDICTION_ENDPOINT = "http://localhost:8000/api/learning/predict-price/"
-CREATE_PROPERTY_ENDPOINT = "http://localhost:8000/api/properties/"
 
 
 # Función para predecir el precio estimado
 def predict_price(lotarea, overallqual, overallcond, centralair, fullbath, bedroomabvgr, garagecars):
+    django_url = os.getenv("DJANGO_PUBLIC_URL")
+    if not django_url:
+        raise ValueError("DJANGO_PUBLIC_URL is not set")
+
+    PREDICTION_ENDPOINT = f"{django_url}/api/learning/predict-price/"
     data = {
         "lotarea": lotarea,
         "overallqual": overallqual,
@@ -25,6 +28,10 @@ def predict_price(lotarea, overallqual, overallcond, centralair, fullbath, bedro
 
 # Función para grabar una propiedad con el precio verificado
 def record_price(lotarea, overallqual, overallcond, centralair, fullbath, bedroomabvgr, garagecars, saleprice):
+    django_url = os.getenv("DJANGO_PUBLIC_URL")
+    if not django_url:
+        raise ValueError("DJANGO_PUBLIC_URL is not set")
+    CREATE_PROPERTY_ENDPOINT = f"{django_url}/api/properties/"
     data = {
         "lotarea": lotarea,
         "overallqual": overallqual,
@@ -99,6 +106,7 @@ def create_ui():
             ],
             outputs=[record_message],
         )
+    return app
 
 
 # Ejecutar la aplicación
