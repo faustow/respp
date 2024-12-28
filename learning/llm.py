@@ -17,7 +17,7 @@ def get_llm_model_and_tokenizer():
     return model, tokenizer
 
 
-def generate_text(prompt):
+def generate_text(prompt, temperature=0.5, top_p=0.8):
     """
     Genera texto basado en un prompt usando el modelo cargado.
 
@@ -124,19 +124,20 @@ def generate_sales_listing(description, property_data):
 
 def generate_customer_profiles_prompt(description, property_data):
     """
-    Genera un prompt claro y estructurado para generar perfiles de clientes.
+    Generates a prompt for customer profiles using comparative analysis.
+    Reference: https://github.com/google-research/FLAN/blob/main/flan/v2/flan_templates_branched.py
     """
     features = generate_property_features(property_data)
-    features_text = "\n- ".join(features)
+    features_text = " ".join(features)
+
     return (
-        f"You are a professional real estate copywriter. You desperately need to sell this property:"
-        f"Property Highlights: {description}\n"
-        f"Property Details:\n- {features_text}\n\n"
-        f"Imagine 5 potential buyers with high chances of wanting the property listed above. "
-        f"Describe their distinct customer profiles as explained below:"
-        f"Each profile should include ALL of the following: his job, approximate annual income, key reasons why this "
-        f"property suits their needs.\n"
-        f"Make sure the profiles are realistic and align with the features of the property."
+        f"TASK: you are a professional real estate copywriter and you need to list and describe the occupation and "
+        f"annual salary of five different potential customers that can afford the property described below."
+        f"CONTEXT: Property Features: {features_text}\n\n"
+        f"RULES: Remember to list FIVE potential buyers occupation and salary. "
+        f"Avoid repeating occupations. "
+        f"Remember to include the annual salary in US dollars FOR EACH buyer."
+        f"Avoid including any details from the property in your response."
     )
 
 
@@ -148,4 +149,4 @@ def generate_customer_profiles(description, property_data):
         return "No info given, impossible to create customer profiles"
 
     prompt = generate_customer_profiles_prompt(description, property_data)
-    return generate_text(prompt)
+    return generate_text(prompt, temperature=0.6)
