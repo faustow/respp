@@ -102,25 +102,27 @@ class ListingAPIView(APIView):
             description=description,
             generated_text=generated_text
         )
+        serializer = ListingSerializer(listing)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response({"generated_text": generated_text}, status=status.HTTP_200_OK)
-
-    def patch(self, request, listing_id):
+    def patch(self, request, listing_id, *args, **kwargs):
         """
-        Actualizar el feedback de un listing.
+        Actualiza el feedback de un Listing.
         """
         try:
             listing = Listing.objects.get(id=listing_id)
         except Listing.DoesNotExist:
-            return Response({"error": "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"Listing {listing_id} not found"}, status=status.HTTP_404_NOT_FOUND)
 
         feedback_score = request.data.get("feedback_score")
-        if feedback_score is not None:
-            listing.feedback_score = feedback_score
-            listing.save()
-            return Response({"message": "Feedback updated successfully"}, status=status.HTTP_200_OK)
+        if feedback_score not in [1, -1]:
+            return Response({"error": "Invalid vote value"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"error": "Invalid input"}, status=status.HTTP_400_BAD_REQUEST)
+        # Actualiza el feedback
+        listing.feedback_score = (listing.feedback_score or 0) + feedback_score
+        listing.save()
+
+        return Response({"message": "Feedback updated successfully"}, status=status.HTTP_200_OK)
 
     def get(self, request, property_id):
         """
