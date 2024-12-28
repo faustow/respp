@@ -2,6 +2,7 @@ import gradio as gr
 
 from ui.apis import search_property, generate_listing, vote_listing
 
+
 def create_search_panel(listing_id_state):
     """Crea el panel para búsqueda de propiedades."""
     with gr.Row(equal_height=True):  # Hacer las columnas de igual altura
@@ -36,6 +37,7 @@ def create_search_panel(listing_id_state):
                    search_centralair, search_fullbath, search_bedroomabvgr, search_garagecars, search_button]),
         gr.Column([search_results]),
     ])
+
 
 def create_listing_panel(search_results, listing_id_state):
     """Crea el panel para generar un listing de ventas."""
@@ -127,21 +129,25 @@ def create_sales_listing_tab():
     Ensambla la pestaña "Sales Listing and Customer Profiling UI".
     """
     with gr.Blocks() as tab:
-        gr.Markdown("### Sales Listing and Customer Profiling UI")
+        gr.Markdown("## Sales Listing and Customer Profiling UI")
 
         # Estado compartido para el listing_id
         listing_id_state = gr.State()
 
         # Panel de búsqueda
-        gr.Markdown("#### Search for Closest Property")
+        gr.Markdown("### Search for Closest Property")
         search_results, search_panel = create_search_panel(listing_id_state)
 
+        gr.Markdown("---")
+
         # Panel para generación de listings
-        gr.Markdown("#### Generate Sales Listing for the Property")
+        gr.Markdown("### Generate Sales Listing for the Property")
         listing_panel = create_listing_panel(search_results, listing_id_state)
 
+        gr.Markdown("---")
+
         # Panel para generación de perfiles de cliente
-        gr.Markdown("#### Generate Customer Profiles for the Listing")
+        gr.Markdown("### Generate Customer Profiles for the Listing")
         customer_profiles_panel = create_customer_profiles_panel(listing_id_state)
 
         # Agregar paneles al bloque

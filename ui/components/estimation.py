@@ -8,11 +8,11 @@ def create_price_estimation_tab():
     Crea la pestaña de "Sale Price Estimation and Recording UI".
     """
     with gr.Blocks() as tab:
-        gr.Markdown("### Sale Price Estimation and Recording UI")
+        gr.Markdown("## Sale Price Estimation and Recording UI")
 
         # Panel para predicción
         with gr.Row():
-            gr.Markdown("#### Predict Sale Price")
+            gr.Markdown("### Predict Sale Price")
             with gr.Column():
                 lotarea = gr.Number(label="Lot Area", value=10000)
                 overallqual = gr.Number(label="Overall Quality", value=7)
@@ -31,9 +31,11 @@ def create_price_estimation_tab():
             outputs=[predicted_price],
         )
 
+        gr.Markdown("---")
+
         # Panel para grabar propiedad
         with gr.Row():
-            gr.Markdown("#### Record Verified Sale Price")
+            gr.Markdown("### Record Verified Sale Price")
             with gr.Column():
                 lotarea_record = gr.Number(label="Lot Area", value=10000, precision=0, minimum=0)
                 overallqual_record = gr.Number(label="Overall Quality", value=7, precision=0, minimum=0, maximum=10)
