@@ -2,11 +2,10 @@ import gradio as gr
 
 from ui.apis import search_property, generate_listing, vote_listing
 
-
 def create_search_panel(listing_id_state):
     """Crea el panel para búsqueda de propiedades."""
-    with gr.Row():
-        with gr.Column():
+    with gr.Row(equal_height=True):  # Hacer las columnas de igual altura
+        with gr.Column(scale=2):  # Ampliar el espacio para los inputs
             search_lotarea = gr.Number(label="Lot Area", value=10000)
             search_overallqual = gr.Number(label="Overall Quality", value=7)
             search_overallcond = gr.Number(label="Overall Condition", value=5)
@@ -15,8 +14,8 @@ def create_search_panel(listing_id_state):
             search_bedroomabvgr = gr.Number(label="Bedrooms Above Grade", value=3)
             search_garagecars = gr.Number(label="Garage Cars", value=2)
             search_button = gr.Button("Search Property")
-        with gr.Column():
-            search_results = gr.JSON(label="Closest Property")
+        with gr.Column(scale=3):  # Más espacio para los resultados
+            search_results = gr.JSON(label="Closest Property")  # Eliminamos interactive=False
 
     search_button.click(
         search_property,
@@ -38,25 +37,23 @@ def create_search_panel(listing_id_state):
         gr.Column([search_results]),
     ])
 
-
 def create_listing_panel(search_results, listing_id_state):
     """Crea el panel para generar un listing de ventas."""
-    with gr.Row():
-        with gr.Column(scale=2):
+    with gr.Row(equal_height=True):
+        with gr.Column(scale=3):  # Ampliar espacio para inputs y resultados
             description_input = gr.Textbox(
                 label="Description",
                 placeholder="Enter the best features of the property...",
                 lines=3,
             )
             generate_button = gr.Button("Generate Listing")
-        with gr.Column(scale=3):
             generated_text_output = gr.Textbox(
                 label="Generated Listing",
                 placeholder="The generated salesy listing will appear here...",
                 lines=5,
                 interactive=False,
             )
-        with gr.Column(scale=1):
+        with gr.Column(scale=1):  # Reducir el espacio para votos
             thumbs_up_button = gr.Button("👍 Thumbs Up")
             thumbs_down_button = gr.Button("👎 Thumbs Down")
             voting_message = gr.Textbox(label="Voting Status", interactive=False)
@@ -87,16 +84,13 @@ def create_listing_panel(search_results, listing_id_state):
     )
 
     return gr.Row([
-        gr.Column([description_input, generate_button], scale=2),
-        gr.Column([generated_text_output], scale=3),
+        gr.Column([description_input, generate_button, generated_text_output], scale=3),
         gr.Column([thumbs_up_button, thumbs_down_button, voting_message], scale=1),
     ])
 
 
 def create_customer_profiles_panel(listing_id_state):
-    """
-    Crea el panel para generar perfiles de cliente para un listado específico.
-    """
+    """Crea el panel para generar perfiles de cliente para un listado específico."""
     with gr.Row():
         generate_profiles_button = gr.Button("Generate Customer Profiles")
         user_profiles_output = gr.Textbox(
@@ -110,8 +104,7 @@ def create_customer_profiles_panel(listing_id_state):
         """Genera perfiles de clientes utilizando el listing_id."""
         if not listing_id:
             return "Error: No listing selected. Please generate a listing first."
-        # Llamar al backend para obtener perfiles de clientes
-        from ui.apis import get_customer_profiles  # Importa la función necesaria
+        from ui.apis import get_customer_profiles
         response = get_customer_profiles(listing_id)
         if isinstance(response, str):  # Si hubo un error
             return response
