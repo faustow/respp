@@ -98,3 +98,16 @@ def vote_listing(vote, listing_id):
     if response.status_code == 200:
         return "Vote registered successfully!"
     return f"Error: {response.status_code} - {response.text}"
+
+
+def get_customer_profiles(listing_id):
+    django_url = os.getenv("DJANGO_PUBLIC_URL")
+    if not django_url:
+        raise ValueError("DJANGO_PUBLIC_URL is not set")
+
+    GET_PROFILES_ENDPOINT = f"{django_url}/api/properties/profiles/{listing_id}/"
+    response = requests.get(GET_PROFILES_ENDPOINT)
+    if response.status_code == 200:
+        data = response.json()
+        return data.get("profiles", [])
+    return f"Error: {response.status_code} - {response.text}"
