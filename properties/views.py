@@ -131,3 +131,32 @@ class ListingAPIView(APIView):
         listings = Listing.objects.filter(property_id=property_id)
         serializer = ListingSerializer(listings, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CustomerProfilesAPIView(APIView):
+    """
+    Endpoint para generar perfiles de clientes para un listado.
+    """
+
+    def get(self, request, listing_id, *args, **kwargs):
+        try:
+            listing = Listing.objects.get(id=listing_id)
+        except Listing.DoesNotExist:
+            return Response({"error": "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Lógica del LLM para generar perfiles (reemplazar con la implementación real)
+        customer_profiles = [
+            {
+                "occupation": "Software Engineer",
+                "annual_income": "$120,000",
+                "reason": "Interested in a home with a large family room and ocean view."
+            },
+            {
+                "occupation": "Financial Analyst",
+                "annual_income": "$150,000",
+                "reason": "Looking for a property with an attic for storage."
+            },
+            # Añadir más perfiles según sea necesario
+        ]
+
+        return Response({"profiles": customer_profiles}, status=status.HTTP_200_OK)
