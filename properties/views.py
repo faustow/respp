@@ -1,5 +1,6 @@
 from django.db.models import F
 from django.db.models.functions import Abs
+from django.forms.models import model_to_dict
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -94,7 +95,7 @@ class ListingAPIView(APIView):
         except Property.DoesNotExist:
             return Response({"error": "Property not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        generated_text = generate_sales_listing(description, property_instance)
+        generated_text = generate_sales_listing(description, model_to_dict(property_instance))
 
         # Crear el listing
         listing = Listing.objects.create(

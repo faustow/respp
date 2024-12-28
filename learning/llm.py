@@ -1,9 +1,9 @@
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 # Variables globales
 model = None
 tokenizer = None
-MODEL_NAME = "google/flan-t5-base"  # Puedes cambiar a "google/flan-t5-small" si necesitas algo más liviano.
+MODEL_NAME = "google/flan-t5-large"
 
 
 def get_llm_model_and_tokenizer():
@@ -29,8 +29,6 @@ def generate_text(prompt):
     outputs = model.generate(
         **inputs,
         max_new_tokens=200,
-        temperature=0.7,  # Más coherencia y diversidad moderada
-        top_p=0.9,  # Permite palabras menos probables
         repetition_penalty=1.2,  # Penaliza repeticiones
     )
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
