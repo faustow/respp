@@ -136,16 +136,17 @@ class ListingAPIView(APIView):
 
 class CustomerProfilesAPIView(APIView):
     """
-    Endpoint para generar perfiles de clientes para un listado.
+    Endpoint para generar perfiles de clientes para un Listing.
     """
 
     def get(self, request, listing_id, *args, **kwargs):
         try:
             listing = Listing.objects.get(id=listing_id)
+            property_data = model_to_dict(listing.property)
         except Listing.DoesNotExist:
             return Response({"error": "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
 
         # Lógica del LLM para generar perfiles (reemplazar con la implementación real)
-        customer_profiles = generate_customer_profiles(listing.generated_text)
+        customer_profiles = generate_customer_profiles(listing.description, property_data)
 
         return Response({"profiles": customer_profiles}, status=status.HTTP_200_OK)
