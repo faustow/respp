@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config.settings import TRAINING_COLUMNS
-from properties.models import Property
-from properties.serializers import PropertySerializer
+from properties.models import Property, Listing
+from properties.serializers import PropertySerializer, ListingSerializer
 
 
 class PropertiesAPIView(APIView):
@@ -77,3 +77,23 @@ class PropertiesAPIView(APIView):
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListingAPIView(APIView):
+    def post(self, request):
+        """
+        Crear un nuevo listing asociado a una propiedad.
+        """
+        serializer = ListingSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, property_id):
+        """
+        Obtener todos los listings asociados a una propiedad.
+        """
+        listings = Listing.objects.filter(property_id=property_id)
+        serializer = ListingSerializer(listings, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
