@@ -108,3 +108,17 @@ class Property(models.Model):
 
     def __str__(self):
         return f"Property Pid{self.pid} - Price: {self.saleprice} (source={self.data_source},dataset={self.dataset})"
+
+
+class Listing(models.Model):
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="listings")
+    description = models.TextField(help_text="User-provided basic description of the best features of the property")
+    generated_text = models.TextField(help_text="LLM-generated salesy listing for the property")
+    feedback_score = models.FloatField(
+        null=True, blank=True,
+        help_text="Score for RLHF (e.g., 1 for thumbs up, -1 for thumbs down)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Listing for Property {self.property.id} created on {self.created_at}"
