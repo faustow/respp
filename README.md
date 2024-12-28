@@ -3,8 +3,11 @@
 This repository hosts a Real Estate Sales and Customer Profiling Application, a robust toolset designed for analyzing,
 marketing, and managing property data. Leveraging state-of-the-art Machine Learning (ML) models and Large Language
 Models (LLMs), the application enables the prediction of property prices, the generation of professional sales listings,
-and the creation of tailored customer profiles of potential buyers. The backend API is built with Django and Django
-Rest Framework, while the user interface is developed using Gradio for a seamless and interactive experience.
+and the creation of tailored customer profiles for potential buyers.
+
+The backend API is built with Django and Django Rest Framework, and the user interface is developed using Gradio for a
+seamless and interactive experience. Additionally, the project is fully compatible with Google Colab, allowing for quick
+deployment and showcasing without the need for local setup.
 
 ## Features
 
@@ -96,4 +99,4 @@ The application is built on the **Ames Housing Dataset**, a rich and detailed da
 
 ### License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License.
