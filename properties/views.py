@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config.settings import TRAINING_COLUMNS
+from learning.llm import generate_sales_listing, generate_customer_profiles
 from properties.models import Property, Listing
 from properties.serializers import PropertySerializer, ListingSerializer
 
@@ -93,8 +94,7 @@ class ListingAPIView(APIView):
         except Property.DoesNotExist:
             return Response({"error": "Property not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Generar texto con el modelo LLM (reemplazar con la lógica real)
-        generated_text = f"Stunning property with {description}. Perfect for your needs!"
+        generated_text = generate_sales_listing(description, property_instance)
 
         # Crear el listing
         listing = Listing.objects.create(
@@ -145,18 +145,6 @@ class CustomerProfilesAPIView(APIView):
             return Response({"error": "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
 
         # Lógica del LLM para generar perfiles (reemplazar con la implementación real)
-        customer_profiles = [
-            {
-                "occupation": "Software Engineer",
-                "annual_income": "$120,000",
-                "reason": "Interested in a home with a large family room and ocean view."
-            },
-            {
-                "occupation": "Financial Analyst",
-                "annual_income": "$150,000",
-                "reason": "Looking for a property with an attic for storage."
-            },
-            # Añadir más perfiles según sea necesario
-        ]
+        customer_profiles = generate_customer_profiles(listing.generated_text)
 
         return Response({"profiles": customer_profiles}, status=status.HTTP_200_OK)
