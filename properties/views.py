@@ -80,15 +80,47 @@ class PropertiesAPIView(APIView):
 
 
 class ListingAPIView(APIView):
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
+        property_id = request.data.get("property_id")
+        description = request.data.get("description")
+
+        if not property_id or not description:
+            return Response({"error": "Property ID and description are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Obtener la propiedad
+        try:
+            property_instance = Property.objects.get(id=property_id)
+        except Property.DoesNotExist:
+            return Response({"error": "Property not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Generar texto con el modelo LLM (reemplazar con la lógica real)
+        generated_text = f"Stunning property with {description}. Perfect for your needs!"
+
+        # Crear el listing
+        listing = Listing.objects.create(
+            property=property_instance,
+            description=description,
+            generated_text=generated_text
+        )
+
+        return Response({"generated_text": generated_text}, status=status.HTTP_200_OK)
+
+    def patch(self, request, listing_id):
         """
-        Crear un nuevo listing asociado a una propiedad.
+        Actualizar el feedback de un listing.
         """
-        serializer = ListingSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            listing = Listing.objects.get(id=listing_id)
+        except Listing.DoesNotExist:
+            return Response({"error": "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        feedback_score = request.data.get("feedback_score")
+        if feedback_score is not None:
+            listing.feedback_score = feedback_score
+            listing.save()
+            return Response({"message": "Feedback updated successfully"}, status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid input"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, property_id):
         """

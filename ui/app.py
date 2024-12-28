@@ -67,6 +67,29 @@ def search_property(lotarea, overallqual, overallcond, centralair, fullbath, bed
     return f"Error: {response.status_code} - {response.text}"
 
 
+def generate_listing(description, search_results):
+    django_url = os.getenv("DJANGO_PUBLIC_URL")
+    if not django_url:
+        raise ValueError("DJANGO_PUBLIC_URL is not set")
+
+    GENERATE_LISTING_ENDPOINT = f"{django_url}/api/properties/listings/"
+    # Extraer el ID de la propiedad de los resultados de búsqueda
+    property_id = search_results.get("id")
+    if not property_id:
+        return "", "Error: No property selected from the search results"
+
+    # Enviar datos al backend
+    payload = {
+        "property_id": property_id,
+        "description": description
+    }
+    response = requests.post(GENERATE_LISTING_ENDPOINT, json=payload)
+    if response.status_code == 200:
+        data = response.json()
+        return data.get("generated_text", "No text generated"), "Listing generated successfully!"
+    return "", f"Error: {response.status_code} - {response.text}"
+
+
 def create_price_estimation_tab():
     """
     Crea la pestaña de "Sale Price Estimation and Recording UI".
@@ -191,6 +214,33 @@ def create_sales_listing_tab():
             ],
             outputs=[search_results],
         )
+
+        # Panel para generación de listings
+        gr.Markdown("#### Generate Sales Listing for the Property")
+        with gr.Row():
+            with gr.Column():
+                description_input = gr.Textbox(
+                    label="Description",
+                    placeholder="Enter the best features of the property...",
+                    lines=3
+                )
+                generate_button = gr.Button("Generate Listing")
+                feedback_message = gr.Textbox(label="Feedback", interactive=False)
+            with gr.Column():
+                generated_text_output = gr.Textbox(
+                    label="Generated Listing",
+                    placeholder="The generated salesy listing will appear here...",
+                    lines=5,
+                    interactive=False
+                )
+
+        # Conectar el botón de generación con la función
+        generate_button.click(
+            generate_listing,
+            inputs=[description_input, search_results],
+            outputs=[generated_text_output, feedback_message],
+        )
+
     return tab
 
 
