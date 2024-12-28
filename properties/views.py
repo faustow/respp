@@ -1,3 +1,5 @@
+from django.db.models import F
+from django.db.models.functions import Abs
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,8 +16,51 @@ class PropertiesAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
         """
-        Listar propiedades existentes.
+        Listar propiedades existentes o buscar la propiedad más cercana a los parámetros dados.
         """
+        query_params = request.query_params
+
+        if query_params:
+            try:
+                # Obtener valores de los parámetros de consulta
+                lotarea = int(query_params.get("lotarea", 0))
+                overallqual = int(query_params.get("overallqual", 0))
+                overallcond = int(query_params.get("overallcond", 0))
+                centralair = 1 if query_params.get("centralair", "Yes") == "Yes" else 0
+                fullbath = int(query_params.get("fullbath", 0))
+                bedroomabvgr = int(query_params.get("bedroomabvgr", 0))
+                garagecars = int(query_params.get("garagecars", 0))
+
+                # Calcular la métrica de distancia
+                properties = Property.objects.annotate(
+                    distance=(
+                            Abs(F("lotarea") - lotarea) +
+                            Abs(F("overallqual") - overallqual) +
+                            Abs(F("overallcond") - overallcond) +
+                            Abs(F("centralair") - centralair) +
+                            Abs(F("fullbath") - fullbath) +
+                            Abs(F("bedroomabvgr") - bedroomabvgr) +
+                            Abs(F("garagecars") - garagecars)
+                    )
+                ).order_by("distance", "-yrsold", "-mosold")
+
+                closest_property = properties.first()
+                if closest_property:
+                    serializer = PropertySerializer(closest_property)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+
+                return Response(
+                    {"message": "No matching property found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            except ValueError as e:
+                return Response(
+                    {"error": f"Invalid query parameters: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Si no hay parámetros de consulta, devolver todas las propiedades
         properties = Property.objects.all()
         data = properties.values(*TRAINING_COLUMNS)
         return Response(data, status=status.HTTP_200_OK)
