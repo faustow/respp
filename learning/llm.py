@@ -125,7 +125,9 @@ def generate_sales_listing(description, property_data):
 def generate_customer_profiles_prompt(description, property_data):
     property_price = property_data.get('saleprice', 0)
     bedrooms = property_data.get('bedroomabvgr', 0)
-    bathrooms = property_data.get('fullbath', 0) + property_data.get('halfbath', 0) * 0.5
+    bathrooms = property_data.get('fullbath', 0)
+    if property_data.get('halfbath'):
+        bathrooms += property_data.get('halfbath', 0) * 0.5
     sqft = property_data.get('grlivarea', 0)
     min_income = property_price / 4
 
