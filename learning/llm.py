@@ -123,21 +123,29 @@ def generate_sales_listing(description, property_data):
 
 
 def generate_customer_profiles_prompt(description, property_data):
-    """
-    Generates a prompt for customer profiles using comparative analysis.
-    Reference: https://github.com/google-research/FLAN/blob/main/flan/v2/flan_templates_branched.py
-    """
-    features = generate_property_features(property_data)
-    features_text = " ".join(features)
+    property_price = property_data.get('saleprice', 0)
+    bedrooms = property_data.get('bedroomabvgr', 0)
+    bathrooms = property_data.get('fullbath', 0) + property_data.get('halfbath', 0) * 0.5
+    sqft = property_data.get('grlivarea', 0)
+    min_income = property_price / 4
 
     return (
-        f"TASK: you are a professional real estate copywriter and you need to list and describe the occupation and "
-        f"annual salary of five different potential customers that can afford the property described below."
-        f"CONTEXT: Property Features: {features_text}\n\n"
-        f"RULES: Remember to list FIVE potential buyers occupation and salary. "
-        f"Avoid repeating occupations. "
-        f"Remember to include the annual salary in US dollars FOR EACH buyer."
-        f"Avoid including any details from the property in your response."
+        f"Task: List 5 potential buyer profiles for a ${property_price} home.\n\n"
+        f"Property details:\n"
+        f"- Highlights: {description}\n"
+        f"- Size: {sqft} square feet\n"
+        f"- Bedrooms: {bedrooms}\n"
+        f"- Bathrooms: {bathrooms}\n\n"
+        f"- Area: {sqft} sq ft\n\n"
+        f"Instructions:\n"
+        f"Generate a list of 5 different occupations with their annual salaries. "
+        f"Each buyer should have an annual income of at least ${min_income:,.0f}. "
+        f"Make each occupation unique.\n\n"
+        f"Expected format example:\n"
+        f"1. Software Engineer - Annual salary: $150,000\n"
+        f"2. Medical Doctor - Annual salary: $280,000\n"
+        f"And so on...\n\n"
+        f"Generate the list:"
     )
 
 

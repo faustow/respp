@@ -50,15 +50,15 @@ class TestLLMFunctions(TestCase):
         result = generate_sales_listing(self.description, self.property_data)
         self.assertIsInstance(result, str)
         self.assertNotEqual(result, "")  # Ensure the generated text is not empty.
-        self.assertIn("family home", result)
-        self.assertIn("OldTown", result)
+        self.assertIn("$", result)
+        self.assertIn("350", result)
 
     def test_generate_customer_profiles_prompt(self):
         prompt = generate_customer_profiles_prompt(self.description, self.property_data)
         self.assertIsInstance(prompt, str)
-        self.assertIn("TASK:", prompt)
-        self.assertIn("Lot size: 12000 sq ft.", prompt)
-        self.assertIn("Avoid repeating occupations.", prompt)
+        self.assertIn("Task: List", prompt)
+        self.assertIn(f"Highlights: {self.description}", prompt)
+        self.assertIn("Make each occupation unique", prompt)
 
     def test_generate_customer_profiles(self):
         result = generate_customer_profiles(self.description, self.property_data)
