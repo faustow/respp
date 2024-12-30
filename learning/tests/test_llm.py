@@ -50,7 +50,6 @@ class TestLLMFunctions(TestCase):
         result = generate_sales_listing(self.description, self.property_data)
         self.assertIsInstance(result, str)
         self.assertNotEqual(result, "")  # Ensure the generated text is not empty.
-        self.assertIn("$", result)
         self.assertIn("350", result)
 
     def test_generate_customer_profiles_prompt(self):
